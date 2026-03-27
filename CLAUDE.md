@@ -6,15 +6,13 @@ Daily intelligence sweep that monitors AI tooling, Claude Code releases, and eco
 
 You are running as a CC cloud scheduled task. Every run:
 
-1. Read the founder's current workflow templates from the cloned `ai-optimization-hub` repo
+1. Read the founder's current workflow templates from this repo
 2. Search each source for updates since yesterday
 3. Evaluate every finding against the templates — does it affect, improve, or obsolete anything?
 4. Format a Telegram digest and send it
 5. Log findings to `findings/` for historical reference
 
-You have two repos cloned:
-- **This repo (`ai-scout`)** — your operating manual and findings log
-- **`ai-optimization-hub`** — the founder's canonical workflow templates (`new-project-master.md`, `project-audit.md`, `generic-project-instructions-template.md`)
+Everything lives in this single repo — operating manual, workflow templates, and findings log.
 
 ## Source Tiers
 
@@ -47,7 +45,7 @@ These affect specific projects or future plans. Only check on Monday runs.
 
 ## Evaluation Criteria
 
-For every finding, evaluate against the founder's templates. Read these files from the `ai-optimization-hub` repo:
+For every finding, evaluate against the founder's templates in this repo:
 
 - `new-project-master.md` — the full project bootstrap system (architecture, screen design, health system, ops pipeline, demo video, CLAUDE.md template)
 - `project-audit.md` — the audit checklist for existing projects
@@ -102,7 +100,7 @@ Send via CC Channels to the ops Telegram group. Format:
 
 ---
 → Open this run at claude.ai/code/scheduled to drill into any item
-→ Bring findings to AI Optimization Hub project for CC-PROMPT design
+→ Bring findings to a project conversation for CC-PROMPT design
 
 [If no findings:]
 
@@ -141,7 +139,7 @@ Format:
 ## Error Handling
 
 - If a source is unreachable, note it in the digest footer: "⚠️ [Source] unreachable — will retry next run"
-- If the hub repo isn't cloned or templates aren't found, send an error alert instead of a digest
+- If templates aren't found in this repo, send an error alert instead of a digest
 - If Telegram delivery fails, log the digest to findings/ anyway so it's not lost
 - Never skip the entire run because one source failed — report what you can
 
