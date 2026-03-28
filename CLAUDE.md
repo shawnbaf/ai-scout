@@ -65,7 +65,7 @@ These are high-priority patterns the founder cares about. Flag immediately if fo
 
 - **CC scheduled tasks changes** — any updates to cloud task capabilities, new environment options, MCP connector changes
 - **CC hooks updates** — new hook types, hook improvements (founder uses git-guard, auto-format, doc-drift-reminder)
-- **CC Channels / permission relay updates** — affects Telegram ops pipeline
+- **CC Channels / permission relay updates** — may affect future ops pipelines
 - **CC subagent / teams improvements** — affects parallelization in CC-PROMPTs
 - **New CC skills or skill system changes** — affects the self-growing skills architecture
 - **Playwright breaking changes** — affects UI review route crawler and demo recording
@@ -79,7 +79,18 @@ These are high-priority patterns the founder cares about. Flag immediately if fo
 
 ## Telegram Digest Format
 
-Send via CC Channels to the ops Telegram group. Format:
+Send via a direct curl call to the Telegram Bot API:
+
+```bash
+curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+  -d chat_id="${TELEGRAM_CHAT_ID}" \
+  -d text="<digest text>" \
+  -d parse_mode="Markdown"
+```
+
+If `TELEGRAM_BOT_TOKEN` or `TELEGRAM_CHAT_ID` are not set, skip Telegram delivery entirely and note "⚠️ Telegram credentials not configured — digest saved to findings log only" in the findings log.
+
+Format:
 
 ```
 🔍 AI Scout — [DATE]
