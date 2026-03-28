@@ -46,6 +46,10 @@ These search for what people are doing with the tools, not what changed in the t
 | "cursor vs claude code workflow" | Competitor workflows worth stealing |
 | "AI tools for developers 2026" | New tools that could plug into our workflow |
 | "remotion video automation" | Patterns beyond what our demo pipeline does |
+| "Claude Code plugins best" | New plugins worth installing |
+| "Claude Code skills community" | Community skill files that fill gaps in our setup |
+| "Claude Code MCP servers useful" | MCP integrations that add real capability |
+| "awesome claude code tools" | Curated tool lists — cherry-pick, don't bulk install |
 
 Search HN, Reddit, and general web. Same evaluation criteria as releases — compare against templates, categorize. Skip noise aggressively using the Founder Profile filter below.
 
