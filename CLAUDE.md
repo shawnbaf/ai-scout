@@ -90,38 +90,29 @@ curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" 
 
 If `TELEGRAM_BOT_TOKEN` or `TELEGRAM_CHAT_ID` are not set, skip Telegram delivery entirely and note "⚠️ Telegram credentials not configured — digest saved to findings log only" in the findings log.
 
+One line per finding. No version numbers, no source labels. Just what changed and why it matters to our workflow. Max 15 words per line. Don't tell us what to do — describe what it means. Details stay in the findings log.
+
 Format:
 
 ```
 🔍 AI Scout — [DATE]
 
-[If findings exist:]
-
 ⚡ ACTION NEEDED ([count])
-1. [Source] — [One-line description]. Impact: [which workflow/system affected]
-2. ...
+1. Hooks now support conditional `if` filtering — affects our three standard hooks
+2. Playwright dropped legacy selectors — could break UI review crawler
 
 💡 OPPORTUNITY ([count])
-3. [Source] — [One-line description]. Potential: [what it would improve]
-4. ...
+3. New FileChanged hook event — would make doc-drift-reminder much cleaner
+4. Hooks can auto-answer permission prompts — enables fully headless scheduled tasks
 
 📌 BOOKMARKED ([count])
-5. [Source] — [One-line summary]
-6. ...
+5. Token overhead reduced for Read tool and skill descriptions
 
----
-→ Open this run at claude.ai/code/scheduled to drill into any item
-→ Bring findings to a project conversation for CC-PROMPT design
-
-[If no findings:]
-
-✅ No meaningful changes detected. All systems current.
-
-[If Tier 2 day:]
-📋 Weekly deep scan included (Next.js, Remotion, local models, quantization)
+→ Details: findings/[DATE].md in ai-scout repo
+→ Full breakdown: open task session at claude.ai/code/scheduled
 ```
 
-Keep it tight. One line per finding. The founder reads this on their phone.
+If no findings: `✅ No changes. All systems current.`
 
 ## Findings Log
 
