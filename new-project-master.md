@@ -1,6 +1,6 @@
 # New Project — Master Reference
 
-> **One doc, zero to shipped.** This file contains everything needed to bootstrap a new app project, design its screens, set up its health system, optionally add Telegram-based remote management, and optionally generate product demo videos. Upload this to a new Claude.ai project and start talking about your idea.
+> **One doc, zero to shipped.** This file contains everything needed to bootstrap a new app project, design its screens, set up its health system, optionally add Telegram-based remote management, set up a live interactive demo mode, and optionally generate product demo videos. Upload this to a new Claude.ai project and start talking about your idea.
 
 ## Table of Contents
 
@@ -8,9 +8,10 @@
 2. **Screen Design Workflow** — Phase 6.5: Design every screen as JSX artifacts, lock them, package as CC-PROMPT
 3. **Health System** — Phase 7: Sentry, dev feedback, unified `npm run health`, UI review, visual verification, self-growing skills
 4. **Ops Pipeline** — Phase 8 (optional): Telegram layer for remote management
-5. **Demo Video Pipeline** — Phase 9 (optional): AI-scripted, auto-recorded product demo videos via Remotion
-6. **CLAUDE.md Template** — CC's per-project operating manual, filled in during doc generation
-7. **Rules** — How this project operates
+5. **Demo Navigator** — Phase 9 (optional): Live interactive presentation mode — PowerPoint for your app
+6. **Demo Video Pipeline** — Phase 10 (optional): AI-scripted, auto-recorded product demo videos via Remotion
+7. **CLAUDE.md Template** — CC's per-project operating manual, filled in during doc generation
+8. **Rules** — How this project operates
 
 ---
 ---
@@ -65,7 +66,7 @@ Based on what you learned, recommend the full technical architecture. Don't ask 
 - **Auth model:** How each user type authenticates
 - **Data model sketch:** The 5–10 core entities and how they relate. Generate a Mermaid ER diagram showing entities and their relationships.
 - **Real-time needs:** If any, how to handle them
-- **Deployment:** Where and how. Branch-based deploys: only `main` triggers production deployment, `dev` branch gets preview/staging URLs. CC works on `dev`; merging to `main` is the deploy gate.
+- **Deployment:** Where and how. Branch-based deploys: only `main` triggers production deployment, `dev` branch gets preview/staging URLs, `demo` branch gets a dedicated demo URL (set up later with the Demo Navigator). CC works on `dev`; merging to `main` is the deploy gate.
 - **Telegram ops (optional):** Ask whether the founder wants Telegram-based remote management from day one (CC acts on errors without being told, build reports to phone, remote approvals). If yes, the ops pipeline gets included after the health system. If not now, note that they can say "set up telegram" at any point. The health system (Sentry, dev feedback, UI review, visual verification) is always standard — it doesn't require Telegram.
 
 Present this as a single cohesive recommendation. The founder reviews, pushes back, and you iterate. Once confirmed, this becomes ARCHITECTURE.md.
@@ -123,7 +124,7 @@ Generate all docs in this order. By Phase 6, every decision is already locked fr
 - **DESIGN-SYSTEM.md** — from Phase 3
 - **FEATURES.md** — from Phase 4
 - **PLAYBOOK.md** — from Phase 4 (launch features → Current Focus, fast follows → Up Next, future → Backlog)
-- **CLAUDE.md** — synthesized from everything above (use the CLAUDE.md Template in Part 6 of this doc)
+- **CLAUDE.md** — synthesized from everything above (use the CLAUDE.md Template in Part 7 of this doc)
 - **LAUNCH-CHECKLIST.md** — generated from architecture decisions
 - **Project Instructions** — the Claude.ai system prompt for the ongoing project
 
@@ -141,7 +142,7 @@ Generate all docs in this order. By Phase 6, every decision is already locked fr
 
 **LAUNCH-CHECKLIST.md:** Checkbox format. Sections: Secrets Rotation (every key/token shared during dev), Security Hardening, Infrastructure, Legal/Compliance, Bilingual/i18n (if applicable), App Store (if mobile), Verification (end-to-end smoke tests), Dev Tooling Removal (gate feedback button, resolve all health items before launch `npm run health` shows zero, gate UI review admin page, resolve all UI review flags `npm run ui-review` shows zero).
 
-**CLAUDE.md:** Use the CLAUDE.md Template in Part 6 of this doc. Fill in [PLACEHOLDER] sections from Phases 1–5. Add 3–7 project-specific Hard Rules. Suggest additional sections based on the architecture.
+**CLAUDE.md:** Use the CLAUDE.md Template in Part 7 of this doc. Fill in [PLACEHOLDER] sections from Phases 1–5. Add 3–7 project-specific Hard Rules. Suggest additional sections based on the architecture.
 
 **Project Instructions:** Generate using the template below. Tailored to the specific project — no generic placeholders.
 
@@ -162,7 +163,7 @@ Adaptation Rules (meta-instructions, do not include in output): "How [Founder] W
 
 ### Doc Maintenance (Always in CLAUDE.md)
 
-Auto-Update Triggers, Flag-Before-Diverge Rule, Session-End Check, Mirror List, Periodic Review (Monthly). See CLAUDE.md Template in Part 6 for the full content.
+Auto-Update Triggers, Flag-Before-Diverge Rule, Session-End Check, Mirror List, Periodic Review (Monthly). See CLAUDE.md Template in Part 7 for the full content.
 
 ### CC Handoff
 
@@ -1359,7 +1360,7 @@ Three standard hooks enforced via `.claude/settings.json` with scripts in `.clau
     ],
     "FileChanged": [
       {
-        "matcher": "schema.prisma|schema.ts|migrations|routes|.env|.env.local|.env.example",
+        "matcher": "schema.prisma|schema.ts|migrations|routes|.env|.env.local|.env.example|demo-sequence.json",
         "hooks": [
           {
             "type": "command",
@@ -1377,8 +1378,8 @@ Three standard hooks enforced via `.claude/settings.json` with scripts in `.clau
 **Event:** `PreToolUse` on `Bash` commands, filtered by `if` to only fire on git push, git merge, and `git add .`
 
 **Blocks:**
-- Push to `main` (any form: `git push origin main`, `git push` when on main)
-- Merge to `main` (any form: `git merge` when on main, merge PR to main)
+- Push to `main` or `demo` (any form: `git push origin main`, `git push` when on main/demo)
+- Merge to `main` or `demo` (any form: `git merge` when on main/demo, merge PR to main/demo)
 - Force push (`--force` or `--force-with-lease`)
 - `git add .` (must use selective staging)
 
@@ -1396,7 +1397,7 @@ Three standard hooks enforced via `.claude/settings.json` with scripts in `.clau
 
 **Event:** `FileChanged` — fires only when watched files actually change on disk. The `matcher` field specifies which filenames to watch (pipe-separated basenames).
 
-**Watches:** Schema files, route files, env files, migration files — whatever files in this project would cause doc drift if changed without updating docs.
+**Watches:** Schema files, route files, env files, migration files — whatever files in this project would cause doc drift if changed without updating docs. Route file changes also trigger a reminder to check `demo-sequence.json`.
 
 **Action:** Exits 0 and prints a JSON object with `additionalContext` reminding CC which docs might need updating based on which file changed. Example: schema change → remind about ARCHITECTURE.md data model section.
 
@@ -1509,7 +1510,7 @@ CC writes the skill files, then walks the founder through:
 4. **Pair** — DM bot → code → `/telegram:access pair` → allowlist policy → add group
 5. **Make Channels Default** — Shell alias
 6. **Persistent Session** — tmux or always-on machine. Enable Remote Control.
-7. **CC Permission Rules** — Allow read/write/test/git/screenshots/health/ui-review/gh. Deny production build/migration deploy/rm -rf/force push/push to main/merge to main.
+7. **CC Permission Rules** — Allow read/write/test/git/screenshots/health/ui-review/gh. Deny production build/migration deploy/rm -rf/force push/push to main or demo/merge to main or demo.
 8. **Sentry → Telegram Alert Rules** — CC generates Sentry API curl commands
 9. **Test** — Verify pairing, heal mode, build mode, screenshot report, full fix cycle
 
@@ -1523,7 +1524,216 @@ CC writes the skill files, then walks the founder through:
 ---
 ---
 
-# Part 5: Demo Video Pipeline (Optional)
+# Part 5: Demo Navigator (Optional)
+
+> **Requires screens and features to exist.** This adds a live interactive presentation mode to the app — like PowerPoint, but running the real app with real data. Define a route sequence, run `npm run demo`, and a floating pill guides you screen by screen.
+
+## What It Is
+
+A presentation mode overlay that sits on top of the running app. You define the order of screens and a one-line reminder for each. During the demo, a small pill shows you what to talk about and a Next button auto-navigates to the next screen. The audience sees a live, fully functional app. You never fumble the order or forget a feature.
+
+**This is not a slideshow.** The app is real. Buttons work. Data is live. If someone asks "can it do X?" you can try it right there.
+
+## How It Works
+
+### Demo Branch & Deployment
+
+Add a `demo` branch alongside `main` and `dev`:
+
+- **`main`** → production
+- **`dev`** → preview/staging
+- **`demo`** → demo URL (e.g., `demo.yourapp.com` or Vercel branch URL)
+
+In the hosting platform's environment settings for the `demo` branch, set `DEMO_MODE=true` and point at a dedicated demo database (a Supabase/Neon branch or a dedicated free-tier instance). The demo database gets seeded with good-looking Faker data.
+
+The demo branch stays frozen on whatever version was last pushed. Update it by cherry-picking from `dev` or merging `dev` → `demo` when the app is in a good state for demoing. CC never pushes to `demo` directly — the founder controls when the demo version updates.
+
+### Demo Sequence File (`demo-sequence.json`)
+
+A simple JSON file defining the route order and presenter notes:
+
+```json
+{
+  "title": "Shift Board — Investor Demo",
+  "pin": "1234",
+  "steps": [
+    { "route": "/", "note": "Dashboard — weekly overview at a glance" },
+    { "route": "/schedule", "note": "Empty schedule — show the pain" },
+    { "route": "/schedule", "action": "click #auto-schedule-btn", "note": "One tap — auto-fills the whole week" },
+    { "route": "/schedule/week", "note": "Weekly view, drag-to-swap any shift" },
+    { "route": "/employees", "note": "103 employees, availability badges" },
+    { "route": "/employees/maria-santos", "note": "Individual profile, shift preferences" },
+    { "route": "/kiosk", "note": "Kiosk mode — clock in/out" },
+    { "route": "/settings", "note": "Settings — roles, rules, constraints" }
+  ],
+  "unplaced": []
+}
+```
+
+**Fields:**
+
+- **`title`** — shown on the start card before the demo begins
+- **`pin`** — required to access the reset button (prevents audience from accidentally wiping demo data)
+- **`steps`** — ordered array of screens to present
+  - `route` — the URL path to navigate to
+  - `note` — your private reminder of what to talk about (the audience sees this too, but it's shorthand — they'll be watching you, not reading the pill)
+  - `action` (optional) — a DOM action to execute on arrival (e.g., click a button to trigger a feature). Format: `click [selector]`, `scroll [selector] [distance]`, `type [selector] [text]`. Most steps don't need this — it's for moments where you want the app to do something dramatic while you narrate.
+- **`unplaced`** — routes CC has added from new features that haven't been ordered into the sequence yet (see Maintenance below)
+
+### The Navigator Pill
+
+A small floating component fixed to the bottom-right of the viewport:
+
+- **Size:** ~280px wide, 48px tall. Semi-transparent dark background (`rgba(0,0,0,0.85)`), rounded corners, subtle border.
+- **Contents:** Step counter (`3/8`), the note text (truncated if long, full text on hover/tap), Back (←) and Next (→) buttons.
+- **Keyboard support:** Left/right arrow keys, space bar for Next.
+- **Behavior:** Tapping Next calls `router.push()` to navigate to the next step's route. If the step has an `action`, it executes after navigation settles (500ms delay). Back goes to the previous step.
+- **Collapse:** The pill collapses to a small circle showing just the step counter when the user is interacting with the app (click/tap anywhere outside the pill). Expands on hover/tap on the pill. This keeps it out of the way during freeform exploration.
+- **Off-script navigation:** If the user navigates manually (someone asks to see a specific screen), the pill stays put at the current step. Tapping Next resumes the sequence from where it left off.
+
+### Start Card
+
+Before step 1, the app shows a full-screen start card:
+
+- Project title (from `demo-sequence.json`)
+- One-line description (from PRODUCT.md or hardcoded)
+- Estimated time (calculated from step count × ~15 seconds, rounded to nearest minute)
+- "Start Demo" button
+
+Sets expectations for the audience. Tapping Start navigates to step 1.
+
+### Reset Button
+
+Inside the pill's gear menu (or long-press on the pill):
+
+- Enter pin → "Reset Demo Data" button
+- Re-runs the seed script via an API endpoint (`/api/demo/reset`)
+- Shows a brief loading state, then navigates back to the start card
+- The API endpoint is only available when `DEMO_MODE=true`
+
+### Demo Data Seeding
+
+CC writes a seed script using **Faker.js with a fixed seed** (`faker.seed(42)`) so data is reproducible across resets. The seed script:
+
+- Clears all existing data in the demo database
+- Populates realistic user names, avatars, emails
+- Fills lists and grids with enough data to look alive (minimum counts per the Visual Production Spec if it exists)
+- Creates data that tells a story — the demo should show a state that makes the product look compelling
+- Seeds bilingual data if the app supports i18n
+
+**Seed script location:** `scripts/demo-seed.[ext]`
+
+**Reset API endpoint:** `[api]/demo/reset.[ext]` — protected behind `DEMO_MODE=true` env check + pin verification. Calls the seed script programmatically. Returns success/failure.
+
+### Environment Gating
+
+The navigator pill, start card, reset endpoint, and all demo infrastructure only load when `DEMO_MODE=true` is set. In production and dev builds, the code is tree-shaken out completely. No demo artifacts leak to users.
+
+## Sequence Maintenance
+
+### CC Auto-Appends New Routes
+
+When CC builds a feature that adds a navigable route, it appends the route to the `unplaced` array in `demo-sequence.json`:
+
+```json
+"unplaced": [
+  { "route": "/reports", "note": "New — reporting dashboard", "added": "2026-03-28" }
+]
+```
+
+CC does NOT place routes into the `steps` array — that's a creative decision about demo flow. CC just ensures new routes don't get forgotten.
+
+### Ordering Unplaced Routes
+
+Two paths:
+
+**In Claude.ai:** The founder says "update the demo sequence." Claude.ai reads the current file, sees unplaced routes, and proposes where they fit in the flow. Iterate, lock, save.
+
+**In CC:** The founder tells CC directly: "slot /reports after /employees in the demo sequence." CC moves it from `unplaced` to `steps` at the specified position.
+
+### Doc-Drift Hook Integration
+
+The doc-drift-reminder hook watches route files. When routes change, CC gets reminded to check `demo-sequence.json` alongside the other docs. This is automatic — no additional hook needed.
+
+### Auto-Update Trigger
+
+Added to CLAUDE.md's Auto-Update Triggers table:
+
+| Code Change | Doc to Update | What to Change |
+|-------------|---------------|----------------|
+| Add/remove a navigable route | `demo-sequence.json` | Append to `unplaced` (new) or remove from `steps` (deleted) |
+
+## Phase 9: Setup
+
+### 9a. Demo Branch
+
+1. Create `demo` branch from current `dev`
+2. Configure hosting platform: `demo` branch → demo URL, set `DEMO_MODE=true`
+3. Set up dedicated demo database (branch or free-tier instance)
+4. Add demo database connection string to `demo` branch env vars
+
+### 9b. Demo Seed Script
+
+CC writes `scripts/demo-seed.[ext]`:
+- Faker.js with fixed seed
+- Clears and repopulates all core entities
+- Makes the app look compelling and realistic
+- Respects i18n if applicable
+
+### 9c. Reset API Endpoint
+
+CC creates `[api]/demo/reset.[ext]`:
+- Gated behind `DEMO_MODE=true` + pin from `demo-sequence.json` (or env var)
+- Calls seed script
+- Returns JSON status
+
+### 9d. Navigator Component
+
+CC creates the navigator pill component:
+- Reads `demo-sequence.json`
+- Manages step state
+- Router integration for auto-navigation
+- Keyboard support (arrow keys, space)
+- Collapse/expand behavior
+- Start card before step 1
+- Reset button behind pin in gear menu
+- Only renders when `DEMO_MODE=true`
+
+Mounts at app root level (same pattern as dev feedback button).
+
+### 9e. Sequence File
+
+Claude.ai authors the initial `demo-sequence.json` during or after the screen design phase. The route order follows the natural product story — not the navigation hierarchy, but the narrative flow that makes the product most compelling.
+
+### 9f. Git Hygiene Update
+
+Update `git-guard` hook to also block push to `demo` branch. CC never pushes to `demo` — the founder cherry-picks or merges when ready.
+
+Update CLAUDE.md branching model to document the three-branch setup.
+
+## Demo Navigator Files
+
+| File | Purpose |
+|------|---------|
+| `demo-sequence.json` | Ordered route sequence with presenter notes |
+| `scripts/demo-seed.[ext]` | Faker.js demo data seeder (shared with video pipeline if both used) |
+| `[api]/demo/reset.[ext]` | Pin-protected reset endpoint (demo env only) |
+| `[components]/DemoNavigator.[ext]` | Navigator pill + start card + reset UI |
+
+## When to Use This
+
+- Investor meetings (pull up the URL on any device)
+- Stakeholder walkthroughs
+- Sales demos
+- Conference booth / kiosk
+- Any time you need to show the product and want to nail the flow without memorizing it
+
+The founder can say "set up demo mode" at any point after screens are built and core features work.
+
+---
+---
+
+# Part 6: Demo Video Pipeline (Optional)
 
 > **Requires screens and features to exist.** This generates a polished product demo video. The script is written in Claude.ai, the recording and composition happen in CC via Playwright and Remotion.
 
@@ -1540,7 +1750,7 @@ A production-grade product demo video: screen recordings of the app in action, w
 
 The script is the creative decision layer — what story to tell, what to show, what text to overlay. CC is the execution layer — recording, composing, rendering.
 
-## Phase 9a: Write the Demo Script (Claude.ai)
+## Phase 10a: Write the Demo Script (Claude.ai)
 
 When the founder says "make a demo video," "create a product video," or similar — this workflow starts here in Claude.ai.
 
@@ -1630,7 +1840,7 @@ Scale durations to target length. 60s video = tighter segments. 120s = more brea
 
 Save the locked script as `demo-script.json` to disk.
 
-## Phase 9b: Demo Data Seeding (CC)
+## Phase 10b: Demo Data Seeding (CC)
 
 Before recording, the app needs to look good — not empty, not fake-looking.
 
@@ -1644,7 +1854,9 @@ CC writes a seed script using **Faker.js with a fixed seed** (`faker.seed(42)`) 
 **Seed script location:** `scripts/demo-seed.[ext]`
 **Run before every recording session.** Reset to clean state, then seed.
 
-## Phase 9c: Screen Recording (CC)
+**Shared with Demo Navigator.** If the project has a Demo Navigator set up, this is the same seed script. One script, two consumers — the navigator's reset button calls it via API, the video pipeline calls it directly before recording.
+
+## Phase 10c: Screen Recording (CC)
 
 CC reads `demo-script.json` and records each `screen_demo` scene as a separate video clip.
 
@@ -1690,7 +1902,7 @@ Save processed clips to `demo-video/clips/[scene_id].mp4`.
 
 After recording, CC generates `demo-video/clips/manifest.json` mapping scene IDs to clip files with actual durations.
 
-## Phase 9d: Remotion Composition (CC)
+## Phase 10d: Remotion Composition (CC)
 
 CC scaffolds a Remotion project (or uses an existing one) and builds the composition from `demo-script.json`.
 
@@ -1784,7 +1996,7 @@ npx remotion render Square out/demo-1x1.mp4
 
 Local rendering uses hardware acceleration on macOS (VideoToolbox). For faster renders or CI, use Remotion Lambda (parallel across up to 200 functions).
 
-## Phase 9e: Review and Iterate
+## Phase 10e: Review and Iterate
 
 CC renders a draft. The founder watches it. Two paths:
 
@@ -1799,7 +2011,7 @@ CC renders a draft. The founder watches it. Two paths:
 | File | Purpose |
 |------|---------|
 | `demo-script.json` | Locked scene script (from Claude.ai) |
-| `scripts/demo-seed.[ext]` | Faker.js demo data seeder |
+| `scripts/demo-seed.[ext]` | Faker.js demo data seeder (shared with Demo Navigator if both used) |
 | `scripts/demo-record.[ext]` | Playwright recording script |
 | `demo-video/clips/` | Recorded + processed MP4 clips |
 | `demo-video/clips/manifest.json` | Clip metadata (durations, scene mapping) |
@@ -1809,19 +2021,20 @@ CC renders a draft. The founder watches it. Two paths:
 ## When to Use This
 
 - Launch video for landing page or app store
-- Feature showcase for stakeholders
 - Social media clips for product marketing
-- Investor demos
-- Any time you need a polished walkthrough without manually screen-recording
+- Async demos (send a video, not a link)
+- Any time you need a polished, edited walkthrough with text cards and music
 
-The founder can say "make a demo" at any point after screens are built and features work. The pipeline runs on whatever's currently deployed.
+For live demos (investor meetings, stakeholder walkthroughs, conference booths), use the Demo Navigator instead — it's live, interactive, and always current.
+
+The founder can say "make a demo video" at any point after screens are built and features work. The pipeline runs on whatever's currently deployed.
 
 ---
 ---
 
-# Part 6: CLAUDE.md Template
+# Part 7: CLAUDE.md Template
 
-> **CC's per-project operating manual.** Fill in [PLACEHOLDER] sections during Phase 6 doc generation. This is what CC reads every session. Everything below this line until Part 7 is template content — generate it per project.
+> **CC's per-project operating manual.** Fill in [PLACEHOLDER] sections during Phase 6 doc generation. This is what CC reads every session. Everything below this line until Part 8 is template content — generate it per project.
 
 ## [PROJECT_NAME] — Claude Code Reference
 
@@ -1885,6 +2098,9 @@ The founder can say "make a demo" at any point after screens are built and featu
 
 # UI review (captures all screens, shows open flags for visual audit)
 [PACKAGE_RUNNER] ui-review
+
+# Demo mode (launches app with navigator pill — demo branch only)
+# [PACKAGE_RUNNER] demo
 ```
 
 **Production warning:** [DESCRIBE_PROD_DB_SITUATION]
@@ -1946,10 +2162,11 @@ When user says "export ui review", "export for claude.ai", or runs with `--expor
 
 ### Branching Model
 
-Two branches:
+Three branches:
 
 - **`main`** — Production. Deploys to production automatically. CC never pushes here. CC never merges here.
 - **`dev`** — Working branch. CC does all work here. Preview/staging deployments trigger automatically from this branch.
+- **`demo`** — Demo presentation environment. Deploys to the demo URL with `DEMO_MODE=true`. CC never pushes here. The founder cherry-picks or merges from `dev` when the app is in a good state for demoing.
 
 Merging `dev` → `main` is done by the founder when ready to ship. This is the only deploy gate.
 
@@ -1969,8 +2186,8 @@ Merging `dev` → `main` is done by the founder when ready to ship. This is the 
 
 ### What CC Never Does
 
-- Push to `main`
-- Merge to `main`
+- Push to `main` or `demo`
+- Merge to `main` or `demo`
 - Force push (`--force` or `--force-with-lease`)
 - Commit unrelated files that happened to be in the working tree
 
@@ -1986,7 +2203,7 @@ Three deterministic hooks in `.claude/settings.json` with scripts in `.claude/ho
 | auto-format | `PostToolUse` + `if` | Write/Edit/MultiEdit on source files | Runs formatter on changed file |
 | doc-drift-reminder | `FileChanged` | Schema, routes, env files change on disk | Reminds CC which docs to update |
 
-**git-guard** blocks push to main, merge to main, force push, and `git add .`. Exit code 2 with explanation.
+**git-guard** blocks push to main/demo, merge to main/demo, force push, and `git add .`. Exit code 2 with explanation.
 
 **auto-format** runs the project's formatter silently. Non-blocking on failure (formatter not installed = skip).
 
@@ -2079,6 +2296,7 @@ _(Empty)_
 | Add a new dependency | ARCHITECTURE.md | Tech stack table |
 | Add a new skill | This file (CLAUDE.md) | Skills table |
 | Add/change a hook | `.claude/settings.json` | Hooks config |
+| Add/remove a navigable route | `demo-sequence.json` | Append to `unplaced` (new) or remove from `steps` (deleted) |
 <!-- [PROJECT_SPECIFIC_TRIGGERS] -->
 
 ### Flag-Before-Diverge Rule
@@ -2087,7 +2305,7 @@ Flag contradictions before implementing. If confirmed, update code AND doc in sa
 
 ### Session-End Check
 
-Feature behavior changed? → check docs. Feature added/removed? → PRODUCT + FEATURES. Completed? → PLAYBOOK. Data model? → ARCHITECTURE. Docs updated? → remind user to sync to Claude.ai. Env vars? → ARCHITECTURE. New dependency? → ARCHITECTURE. New skill? → CLAUDE.md skills table. New hook? → `.claude/settings.json`. PLAYBOOK stale? → update. Docs disagree? → reconcile.
+Feature behavior changed? → check docs. Feature added/removed? → PRODUCT + FEATURES + demo-sequence.json (append to unplaced). Completed? → PLAYBOOK. Data model? → ARCHITECTURE. Docs updated? → remind user to sync to Claude.ai. Env vars? → ARCHITECTURE. New dependency? → ARCHITECTURE. New skill? → CLAUDE.md skills table. New hook? → `.claude/settings.json`. Route added/removed? → demo-sequence.json. PLAYBOOK stale? → update. Docs disagree? → reconcile.
 
 ### Mirror List
 
@@ -2102,7 +2320,7 @@ Run doc health check. Flag anything stale across PLAYBOOK, FEATURES, PRODUCT, AR
 ---
 ---
 
-# Part 7: Rules
+# Part 8: Rules
 
 ## Rules for the Bootstrap Project
 

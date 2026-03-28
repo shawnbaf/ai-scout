@@ -165,9 +165,11 @@
 
 - [ ] `dev` branch exists and is the default working branch for CC
 - [ ] `main` branch is production — CC never pushes or merges to it
+- [ ] `demo` branch exists for presentation mode — CC never pushes or merges to it
 - [ ] Hosting platform (Vercel/etc.) configured: only `main` deploys to production
 - [ ] Preview/staging deployments trigger from `dev` branch (or all non-main branches)
-- [ ] CLAUDE.md contains Git Hygiene section with branching model, commit rules, and prohibitions
+- [ ] `demo` branch deploys to dedicated demo URL with `DEMO_MODE=true`
+- [ ] CLAUDE.md contains Git Hygiene section with three-branch model, commit rules, and prohibitions
 - [ ] CC uses selective staging (not `git add .`)
 - [ ] CC uses conventional commit format (feat/fix/docs/refactor/chore)
 - [ ] CC runs build check before every commit
@@ -183,7 +185,7 @@
 
 ### git-guard
 - [ ] `PreToolUse` hook on `Bash` with `if` field filtering to git push/merge/add commands
-- [ ] Blocks push to `main`, merge to `main`, force push, `git add .`
+- [ ] Blocks push to `main` and `demo`, merge to `main` and `demo`, force push, `git add .`
 - [ ] Uses `$CLAUDE_PROJECT_DIR` prefix for script path
 - [ ] Exit code 2 with stderr explanation on block
 
@@ -194,8 +196,9 @@
 
 ### doc-drift-reminder
 - [ ] Uses `FileChanged` event (not PostToolUse) — fires only when watched files change on disk
-- [ ] `matcher` field lists watched basenames (schema, routes, env files — pipe-separated)
+- [ ] `matcher` field lists watched basenames (schema, routes, env files, `demo-sequence.json` — pipe-separated)
 - [ ] Returns JSON with `additionalContext` mapping changed file to relevant doc section
+- [ ] Route file changes trigger reminder to check `demo-sequence.json`
 - [ ] Project-specific watched files and doc reminders filled in during setup
 
 ### Hook Infrastructure
@@ -209,11 +212,14 @@
 
 - [ ] Skills table includes: Project Health, Error Triage, Visual QA, Fix Guardrails
 - [ ] Commands block includes `health` and `ui-review`
+- [ ] Commands block includes commented `demo` command (uncommented when demo navigator is set up)
 - [ ] Hooks section documents all three standard hooks + `if` field syntax for adding more
+- [ ] Git Hygiene section documents three-branch model (`main`, `dev`, `demo`) with CC prohibited from pushing to `main` or `demo`
 - [ ] Project Health workflow section (run → investigate → summary list → details → reply shortcuts → fix → resolve → verify → clean)
 - [ ] UI Review workflow section (capture → read visual-qa SKILL.md → Pass 1 compliance flags by severity → Pass 2 enhancement suggestions by impact → present → fix flags → re-capture → resolve → clean. Suggestions require confirmation before building. Export mode: `--export` → upload to Claude.ai project → design-surface review → fix instructions back to CC)
 - [ ] Presentation format: numbered list, no ASCII tables, IDs in details only, brackets include file count, reply with numbers
-- [ ] Doc Maintenance section (auto-update triggers, flag-before-diverge, session-end check, mirror list)
+- [ ] Doc Maintenance section (auto-update triggers including demo-sequence.json on route changes, flag-before-diverge, session-end check, mirror list)
+- [ ] Session-End Check includes: route added/removed → demo-sequence.json
 - [ ] Hard Rules include Demand Elegance, verify each track against spec before moving on, + project-specific rules
 
 ---
@@ -225,6 +231,52 @@
 - [ ] All health items resolved before launch (`health` shows zero)
 - [ ] UI review admin page gated behind admin/dev check
 - [ ] All UI review flags resolved before launch (`ui-review` shows zero)
+- [ ] Demo navigator does not appear in production builds (`DEMO_MODE` not set on `main`)
+
+---
+
+## Demo Navigator (Optional)
+
+### Branch & Deployment
+- [ ] `demo` branch exists
+- [ ] Hosting platform configured: `demo` branch deploys to dedicated demo URL
+- [ ] `DEMO_MODE=true` set in `demo` branch environment variables
+- [ ] Dedicated demo database configured (separate from dev and production)
+- [ ] Demo database connection string set in `demo` branch env vars
+- [ ] git-guard blocks CC from pushing or merging to `demo`
+
+### Sequence File
+- [ ] `demo-sequence.json` exists with `title`, `pin`, `steps`, and `unplaced` fields
+- [ ] Steps define `route` and `note` for each screen in presentation order
+- [ ] Optional `action` fields use correct format (`click [selector]`, `scroll [selector] [distance]`, `type [selector] [text]`)
+- [ ] `unplaced` array exists for CC to append new routes
+
+### Navigator Component
+- [ ] Navigator pill component exists, renders at app root level
+- [ ] Only renders when `DEMO_MODE=true` (tree-shaken from production builds)
+- [ ] Shows step counter, note text, back/next buttons
+- [ ] Keyboard support (arrow keys, space bar)
+- [ ] Collapses to small circle during app interaction, expands on hover/tap
+- [ ] Off-script navigation doesn't break sequence (Next resumes from current step)
+- [ ] Start card shown before step 1 (title, description, estimated time, Start button)
+
+### Reset System
+- [ ] Reset button in pill gear menu, protected behind pin
+- [ ] Reset API endpoint (`[api]/demo/reset`) exists
+- [ ] Endpoint gated behind `DEMO_MODE=true` + pin verification
+- [ ] Endpoint calls seed script, returns JSON status
+
+### Demo Data
+- [ ] `scripts/demo-seed.[ext]` exists with Faker.js + fixed seed
+- [ ] Seed script clears and repopulates all core entities
+- [ ] Data looks realistic and compelling (not empty, not obviously fake)
+- [ ] Bilingual data seeded if app supports i18n
+
+### Sequence Maintenance
+- [ ] CC appends new routes to `unplaced` array when building features that add navigable routes
+- [ ] Doc-drift-reminder `matcher` includes `demo-sequence.json`
+- [ ] Auto-Update Triggers table includes route changes → `demo-sequence.json`
+- [ ] Session-End Check includes route added/removed → `demo-sequence.json`
 
 ---
 
@@ -239,7 +291,7 @@
 - [ ] Channels alias set as default
 - [ ] Agent Teams enabled in settings
 - [ ] Sentry → Telegram alert rules configured
-- [ ] CC permission rules set (allow read/write/test/git/screenshots/health/ui-review, deny prod build/migration/rm -rf/force push/push to main/merge to main)
+- [ ] CC permission rules set (allow read/write/test/git/screenshots/health/ui-review, deny prod build/migration/rm -rf/force push/push to main/demo/merge to main/demo)
 - [ ] Remote Control enabled for all sessions
 
 ---
@@ -254,7 +306,7 @@
 - [ ] Scene interactions are specific enough for Playwright replay (selectors, wait times, scroll distances)
 
 ### Demo Data
-- [ ] `scripts/demo-seed.[ext]` exists
+- [ ] `scripts/demo-seed.[ext]` exists (shared with Demo Navigator if both used)
 - [ ] Uses Faker.js with fixed seed for reproducible data
 - [ ] Data looks compelling (not empty, not obviously fake)
 - [ ] Bilingual data seeded if app supports i18n
