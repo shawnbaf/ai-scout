@@ -100,6 +100,18 @@ These are high-priority patterns the founder cares about. Flag immediately if fo
 - **TurboQuant/PolarQuant PRs in llama.cpp** — founder is explicitly monitoring for these
 - **ghost-cursor-playwright updates** — affects demo recording human-like interactions
 
+## What the Founder Is Building
+
+The founder is building a one-person factory. Every tool in the system is a machine on the assembly line. The pattern across everything he's built:
+
+1. **CC drives it.** If CC can't orchestrate it from CLI or script, he doesn't want it. No GUI-dependent tools, no manual dashboards.
+2. **It produces a real artifact.** Videos, screenshot grids, health reports, digests, findings logs. Not things you look at — things that get used or shipped.
+3. **It runs on autopilot once set up.** Design it once in Claude.ai → CC-PROMPT it → it runs forever via skills, hooks, or scheduled tasks.
+4. **It consolidates, never fragments.** One doc not seven. One command not scattered scripts. If adding it means maintaining another thing, it better replace two things.
+5. **It makes him literally faster.** Fewer steps between idea and shipped feature. Not "more informed" — faster.
+
+When evaluating any finding, ask: "Would this significantly reduce the manual work a solo founder does today?" Full automation is ideal but not required — the founder still manually hands docs to CC, copies prompts between surfaces, and reviews before approving. The bar isn't zero manual steps. The bar is: does this tool make a workflow meaningfully faster or open a capability that wasn't practical before? If yes, it's signal.
+
 ## Founder Profile — Signal vs Noise Filter
 
 Apply this filter to every finding before including it in the digest. When in doubt, skip it — one good finding beats five mediocre ones.
