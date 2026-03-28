@@ -301,7 +301,7 @@ Package with all locked JSX artifacts from `/mnt/user-data/outputs/screens/` as 
 
 When generating the health system CC-PROMPT for a project, fill in all `[PLACEHOLDER]` values from the project's architecture, deploy targets, protected systems, and stack-specific commands.
 
-**Use teams for parallelization.** Dependency graph: Sentry SDK (Track 1) first → soft-failure instrumentation (Track 2, fan out) → visual verification (Track 3, independent) → unified health system (Track 4, independent) → UI review system (Track 5, independent, can parallelize with Track 4) → starter skills (Track 6, requires reading project docs) → health skill file (Track 7, written LAST).
+**Use teams for parallelization.** Dependency graph: Sentry SDK (Track 1) first → soft-failure instrumentation (Track 2, fan out) → visual verification (Track 3, independent) → unified health system (Track 4, independent) → UI review system (Track 5, independent, can parallelize with Track 4) → starter skills (Track 6, requires reading project docs) → hooks (Track 7, independent, can parallelize with Track 6) → health skill file (Track 8, written LAST).
 
 ## Presentation Format — All Outputs
 
@@ -1324,7 +1324,105 @@ Pre-change verification, scope limits, protected patterns, rollback lessons, Lea
 
 ---
 
-## Track 7: Health Skill File (WRITE LAST)
+## Track 7: Hooks
+
+Three standard hooks enforced via `.claude/settings.json` with scripts in `.claude/hooks/`. These are deterministic — they fire every time, no token cost, no LLM judgment.
+
+### Hook Configuration (`.claude/settings.json`)
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "if": "Bash(git push*) || Bash(git merge*) || Bash(git add .)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/git-guard.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(**/*.{ts,tsx,js,jsx,css,json,md}) || Edit(**/*.{ts,tsx,js,jsx,css,json,md}) || MultiEdit(**/*.{ts,tsx,js,jsx,css,json,md})",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/auto-format.sh"
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": "schema.prisma|schema.ts|migrations|routes|.env|.env.local|.env.example",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/doc-drift-reminder.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 7a. git-guard (`.claude/hooks/git-guard.sh`)
+
+**Event:** `PreToolUse` on `Bash` commands, filtered by `if` to only fire on git push, git merge, and `git add .`
+
+**Blocks:**
+- Push to `main` (any form: `git push origin main`, `git push` when on main)
+- Merge to `main` (any form: `git merge` when on main, merge PR to main)
+- Force push (`--force` or `--force-with-lease`)
+- `git add .` (must use selective staging)
+
+**Output:** Exit code 2 with stderr message explaining what was blocked and why. CC sees the message and adjusts.
+
+### 7b. auto-format (`.claude/hooks/auto-format.sh`)
+
+**Event:** `PostToolUse` on `Write|Edit|MultiEdit`, filtered by `if` to only fire on source files (not node_modules, not build output, not binary files).
+
+**Action:** Runs the project's formatter (Prettier, Biome, Black, etc.) on the changed file. Uses `$CLAUDE_TOOL_INPUT_FILE_PATH` to target the specific file.
+
+**Behavior:** Silent on success. If formatter not installed, exits 0 silently (non-blocking). CC doesn't need to know formatting happened.
+
+### 7c. doc-drift-reminder (`.claude/hooks/doc-drift-reminder.sh`)
+
+**Event:** `FileChanged` — fires only when watched files actually change on disk. The `matcher` field specifies which filenames to watch (pipe-separated basenames).
+
+**Watches:** Schema files, route files, env files, migration files — whatever files in this project would cause doc drift if changed without updating docs.
+
+**Action:** Exits 0 and prints a JSON object with `additionalContext` reminding CC which docs might need updating based on which file changed. Example: schema change → remind about ARCHITECTURE.md data model section.
+
+**Why FileChanged instead of PostToolUse:** PostToolUse fires after every tool call, then the script has to check if the file was relevant. FileChanged fires only when the specific watched files change — no wasted hook executions. Cleaner, faster, less noise in long sessions.
+
+### 7d. Hook Scripts Setup
+
+All scripts in `.claude/hooks/` must be executable (`chmod +x`). Use `$CLAUDE_PROJECT_DIR` prefix for all paths — hooks must work regardless of CWD within the project.
+
+CC generates the three scripts during health system setup, filling in project-specific values:
+- **git-guard:** No project-specific values needed — same logic everywhere
+- **auto-format:** Formatter command varies by project (Prettier, Biome, etc.)
+- **doc-drift-reminder:** Watched files and corresponding doc reminders vary by project
+
+### 7e. Adding Custom Hooks
+
+Projects can add more hooks beyond the standard three. Common additions:
+- **test-on-change:** `FileChanged` watching test files → run relevant test suite
+- **type-check:** `PostToolUse` on `Write|Edit` for `.ts` files → run `tsc --noEmit`
+- **deploy-guard:** `PreToolUse` on `Bash` with `if` matching deploy commands → block in dev, allow in CI
+
+The `if` field uses permission rule syntax: `ToolName(glob-pattern)` with `||` for OR and `&&` for AND. This replaces the old pattern of writing bash scripts to filter tool inputs.
+
+---
+
+## Track 8: Health Skill File (WRITE LAST)
 
 **New file:** `.claude/skills/project-health.md`
 
@@ -1360,6 +1458,9 @@ Pre-change verification, scope limits, protected patterns, rollback lessons, Lea
 | `.claude/skills/visual-qa/SKILL.md` | Two-pass frontend audit (compliance + enhancement) |
 | `.claude/skills/visual-qa/references/enhancement-standards.md` | Universal Pass 2 design best practices |
 | `.claude/skills/fix-guardrails.md` | Safe fix rules |
+| `.claude/hooks/git-guard.sh` | Blocks push/merge to main, force push, git add . |
+| `.claude/hooks/auto-format.sh` | Runs formatter on changed source files |
+| `.claude/hooks/doc-drift-reminder.sh` | Reminds CC to update docs when schema/routes/env change |
 
 ### Environment Variables
 | Variable | Where |
@@ -1875,6 +1976,26 @@ Merging `dev` → `main` is done by the founder when ready to ship. This is the 
 
 ---
 
+## Hooks
+
+Three deterministic hooks in `.claude/settings.json` with scripts in `.claude/hooks/`. These fire automatically — no token cost, no LLM judgment.
+
+| Hook | Event | Trigger | What It Does |
+|------|-------|---------|-------------|
+| git-guard | `PreToolUse` + `if` | Git push/merge/force-push/`git add .` | Blocks prohibited git operations |
+| auto-format | `PostToolUse` + `if` | Write/Edit/MultiEdit on source files | Runs formatter on changed file |
+| doc-drift-reminder | `FileChanged` | Schema, routes, env files change on disk | Reminds CC which docs to update |
+
+**git-guard** blocks push to main, merge to main, force push, and `git add .`. Exit code 2 with explanation.
+
+**auto-format** runs the project's formatter silently. Non-blocking on failure (formatter not installed = skip).
+
+**doc-drift-reminder** uses `FileChanged` event — only fires when watched files actually change, not after every tool call. Injects `additionalContext` telling CC which doc section to check.
+
+**Adding hooks:** The `if` field uses permission rule syntax (`ToolName(glob-pattern)` with `||`/`&&`) to filter when hooks fire. Add project-specific hooks as needed — see `.claude/settings.json` for the current configuration.
+
+---
+
 ## Key Patterns
 
 **Subagent Strategy** — Use subagents to keep the main context window clean. One task per subagent.
@@ -1956,7 +2077,8 @@ _(Empty)_
 | Change feature connections | FEATURES.md | Dependency graph |
 | Add/change env vars | ARCHITECTURE.md | Environment section |
 | Add a new dependency | ARCHITECTURE.md | Tech stack table |
-| Create a new skill | This file (CLAUDE.md) | Skills table |
+| Add a new skill | This file (CLAUDE.md) | Skills table |
+| Add/change a hook | `.claude/settings.json` | Hooks config |
 <!-- [PROJECT_SPECIFIC_TRIGGERS] -->
 
 ### Flag-Before-Diverge Rule
@@ -1965,7 +2087,7 @@ Flag contradictions before implementing. If confirmed, update code AND doc in sa
 
 ### Session-End Check
 
-Feature behavior changed? → check docs. Feature added/removed? → PRODUCT + FEATURES. Completed? → PLAYBOOK. Data model? → ARCHITECTURE. Docs updated? → remind user to sync to Claude.ai. Env vars? → ARCHITECTURE. New dependency? → ARCHITECTURE. New skill? → CLAUDE.md skills table. PLAYBOOK stale? → update. Docs disagree? → reconcile.
+Feature behavior changed? → check docs. Feature added/removed? → PRODUCT + FEATURES. Completed? → PLAYBOOK. Data model? → ARCHITECTURE. Docs updated? → remind user to sync to Claude.ai. Env vars? → ARCHITECTURE. New dependency? → ARCHITECTURE. New skill? → CLAUDE.md skills table. New hook? → `.claude/settings.json`. PLAYBOOK stale? → update. Docs disagree? → reconcile.
 
 ### Mirror List
 

@@ -176,10 +176,40 @@
 
 ---
 
+## Hooks
+
+- [ ] `.claude/settings.json` contains hooks configuration
+- [ ] `.claude/hooks/` directory exists with executable scripts
+
+### git-guard
+- [ ] `PreToolUse` hook on `Bash` with `if` field filtering to git push/merge/add commands
+- [ ] Blocks push to `main`, merge to `main`, force push, `git add .`
+- [ ] Uses `$CLAUDE_PROJECT_DIR` prefix for script path
+- [ ] Exit code 2 with stderr explanation on block
+
+### auto-format
+- [ ] `PostToolUse` hook on `Write|Edit|MultiEdit` with `if` field filtering to source files
+- [ ] Runs project formatter (Prettier/Biome/etc.) on `$CLAUDE_TOOL_INPUT_FILE_PATH`
+- [ ] Silent on success, non-blocking on failure (formatter not installed = skip)
+
+### doc-drift-reminder
+- [ ] Uses `FileChanged` event (not PostToolUse) — fires only when watched files change on disk
+- [ ] `matcher` field lists watched basenames (schema, routes, env files — pipe-separated)
+- [ ] Returns JSON with `additionalContext` mapping changed file to relevant doc section
+- [ ] Project-specific watched files and doc reminders filled in during setup
+
+### Hook Infrastructure
+- [ ] All scripts use `$CLAUDE_PROJECT_DIR` prefix (works regardless of CWD)
+- [ ] All scripts are executable (`chmod +x`)
+- [ ] `if` field uses permission rule syntax for filtering (not bash-level filtering)
+
+---
+
 ## CLAUDE.md Configuration
 
 - [ ] Skills table includes: Project Health, Error Triage, Visual QA, Fix Guardrails
 - [ ] Commands block includes `health` and `ui-review`
+- [ ] Hooks section documents all three standard hooks + `if` field syntax for adding more
 - [ ] Project Health workflow section (run → investigate → summary list → details → reply shortcuts → fix → resolve → verify → clean)
 - [ ] UI Review workflow section (capture → read visual-qa SKILL.md → Pass 1 compliance flags by severity → Pass 2 enhancement suggestions by impact → present → fix flags → re-capture → resolve → clean. Suggestions require confirmation before building. Export mode: `--export` → upload to Claude.ai project → design-surface review → fix instructions back to CC)
 - [ ] Presentation format: numbered list, no ASCII tables, IDs in details only, brackets include file count, reply with numbers
