@@ -30,6 +30,25 @@ These sources change the founder's daily work. Check all of them every run.
 | Reddit r/ClaudeAI | Search: `site:reddit.com/r/ClaudeAI` last 24h | Workflow tricks, undocumented features, community patterns |
 | Playwright Releases | Search: `playwright releases changelog 2026` | UI review + demo recording pipeline dependency |
 
+### Workflows & Patterns (daily)
+
+These search for what people are doing with the tools, not what changed in the tools.
+
+| Search Query | Why It Matters |
+|-------------|----------------|
+| "Claude Code workflow tips" | Practitioner patterns, productivity tricks |
+| "Claude Code multiple agents parallel" | Multi-agent orchestration patterns |
+| "Claude Code frontend design" | UI/UX workflows, design-to-code patterns |
+| "AI video creation workflow 2026" | Remotion, Playwright recording, demo generation |
+| "solo developer AI productivity" | One-person team scaling patterns |
+| "Claude Code hooks creative uses" | Community hook patterns we haven't thought of |
+| "AI coding agent best practices" | General patterns applicable to our CC setup |
+| "cursor vs claude code workflow" | Competitor workflows worth stealing |
+| "AI tools for developers 2026" | New tools that could plug into our workflow |
+| "remotion video automation" | Patterns beyond what our demo pipeline does |
+
+Search HN, Reddit, and general web. Same evaluation criteria as releases — compare against templates, categorize. Skip noise aggressively using the Founder Profile filter below.
+
 ### Tier 2 — Check Weekly (Mondays only)
 
 These affect specific projects or future plans. Only check on Monday runs.
@@ -77,6 +96,39 @@ These are high-priority patterns the founder cares about. Flag immediately if fo
 - **TurboQuant/PolarQuant PRs in llama.cpp** — founder is explicitly monitoring for these
 - **ghost-cursor-playwright updates** — affects demo recording human-like interactions
 
+## Founder Profile — Signal vs Noise Filter
+
+Apply this filter to every finding before including it in the digest. When in doubt, skip it — one good finding beats five mediocre ones.
+
+### Signal — always include:
+- Reduces manual steps in an existing workflow (health system, UI review, screen design, demo video, scout itself)
+- Patterns for running multiple CC agents on the same codebase without conflicts (worktrees, parallel tracks, subagent orchestration)
+- Design-to-code workflows that are tighter than the current JSX artifact → CC-PROMPT pipeline
+- Advanced CC skills/hooks/CLAUDE.md patterns — beginner tips are noise, creative uses of systems we already run are signal
+- Local model tricks for 8GB VRAM (Ollama, llama.cpp, quantization breakthroughs, context window expansion)
+- Remotion patterns beyond basic composition — dynamic scene generation, automated multi-format export, anything the demo pipeline doesn't already do
+- Managing multiple projects as one person without multiplying maintenance
+- Anything that makes "update once, apply everywhere" more real
+- New CC features that affect scheduled tasks, hooks, channels, subagents, or skills — these are the systems we actively use
+- New tools that could plug into the existing workflow — the way Remotion plugged into the demo pipeline. Look for tools that: solve a real problem the founder currently handles manually, work from CLI or have programmatic APIs (CC needs to drive them), don't require a team to operate, and have a free tier or one-time cost. Examples: video/media generation, design automation, screenshot/visual testing, deployment utilities, code generation, documentation generators, data seeding, anything CC could orchestrate.
+- If a workflow pattern uses a tool we don't use, include the full finding — the tool might be worth evaluating
+
+### Noise — always skip:
+- Beginner tutorials ("how to install Claude Code", "getting started with CC")
+- Generic AI hype ("AI will change everything", "10 ways AI boosts productivity")
+- Tool comparisons for tools already evaluated and rejected
+- Enterprise or team-specific workflows — the founder is solo
+- SaaS tools that require ongoing subscriptions with no free tier and no clear ROI for a solo operator
+- Cursor, Copilot, or Windsurf migration guides — committed to CC
+- Prompt engineering basics
+- "Awesome Claude Code" lists that are just link dumps
+- Content marketing disguised as tips
+- Anything the founder's system already does — don't report what we already built as a discovery
+
+### Edge cases:
+- If someone solved a problem we haven't hit yet but might, that's BOOKMARKED not OPPORTUNITY
+- If a finding is stale (we already adopted it), skip it entirely — check the template docs first
+
 ## Telegram Digest Format
 
 Send via a direct curl call to the Telegram Bot API:
@@ -97,22 +149,26 @@ Format:
 ```
 🔍 AI Scout — [DATE]
 
+🔧 TOOL UPDATES
 ⚡ ACTION NEEDED ([count])
-1. Hooks now support conditional `if` filtering — affects our three standard hooks
-2. Playwright dropped legacy selectors — could break UI review crawler
-
+1. ...
 💡 OPPORTUNITY ([count])
-3. New FileChanged hook event — would make doc-drift-reminder much cleaner
-4. Hooks can auto-answer permission prompts — enables fully headless scheduled tasks
+2. ...
+
+🧠 WORKFLOWS & PATTERNS
+💡 WORTH TRYING ([count])
+3. ...
 
 📌 BOOKMARKED ([count])
-5. Token overhead reduced for Read tool and skill descriptions
+4. ...
 
-→ Details: findings/[DATE].md in ai-scout repo
+→ Details: findings/[DATE].md
 → Full breakdown: open task session at claude.ai/code/scheduled
 ```
 
 If no findings: `✅ No changes. All systems current.`
+
+Remember: one line per finding. No version numbers. Just what changed and why it matters to our workflow. Max 15 words per line. Details stay in the findings log.
 
 ## Findings Log
 
