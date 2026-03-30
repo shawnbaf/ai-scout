@@ -65,6 +65,45 @@ These affect specific projects or future plans. Only check on Monday runs.
 | Ollama / llama.cpp | Search: `ollama releases OR llama.cpp releases 2026` | Local model routing on Alienware |
 | Quantization News | Search: `TurboQuant OR PolarQuant OR KV cache compression llama.cpp 2026` | Would expand context windows within current VRAM envelope |
 | Composio Updates | Search: `composio MCP updates 2026` | Remote MCP connector for Telegram in cloud tasks |
+| Socket.dev Blog | Search: `site:socket.dev/blog npm supply chain` | npm supply chain attacks — catches compromised packages in your dependency tree |
+| Next.js Security Advisories | Search: `site:nextjs.org/blog security CVE` | First-party CVE disclosures for your app framework. React2Shell was CVSS 10.0. |
+| Supabase Security Blog | Search: `site:supabase.com/blog security OR RLS` | RLS changes, auth security updates, new security features. 80% of AI-built apps have broken RLS. |
+| Aikido.dev Blog | Search: `site:aikido.dev/blog security vulnerability` | Covers the exact intersection of Next.js + Supabase + Vercel + React security |
+| Vercel Security Bulletins | Search: `site:vercel.com/kb security OR bulletin` | Platform-level security response, WAF deployments, automatic protections |
+| OWASP GenAI Security | Search: `site:genai.owasp.org update` | LLM Top 10 + Agentic Top 10 — relevant for apps incorporating AI features |
+| Vibe Coding Security | Search: `"vibe coding security" Supabase RLS vulnerability 2026` | The vulnerability class specific to AI-built apps — broken RLS, exposed service keys, missing email confirmation |
+
+### Tier 3 — Check Biweekly (1st and 15th of month)
+
+These monitor the quality standards themselves — design craft, performance patterns, and demo/presentation techniques. They move slower than tools or security, so biweekly is the right cadence.
+
+#### Design Craft
+
+| Source | What to Search | Why It Matters |
+|--------|---------------|----------------|
+| Frontend Focus Newsletter | Search: `site:frontendfoc.us` | **Aggregator** — curates 10-15 links/week from across the frontend ecosystem. Scanning 2 issues covers the long tail. |
+| web.dev New to Web Platform | Search: `site:web.dev "new to the web platform"` | Monthly digest of every CSS/HTML/JS feature shipping across browsers with Baseline status |
+| Adam Argyle / nerdy.dev | Search: `site:nerdy.dev` | Chrome DevRel engineer — publishes exact OKLCH values, easing curves, copy-paste CSS patterns |
+| Emil Kowalski | Search: `site:emilkowal.ski OR animations.dev` | Linear/Vercel design engineer — specific animation timing values, spring configs, toast/drawer patterns |
+| shadcn/ui Changelog | Search: `shadcn/ui changelog 2026 OR site:github.com/shadcn-ui/ui releases` | Component architecture evolution, new patterns, variant updates |
+| React Core Blog | Search: `site:react.dev/blog` | React Compiler patterns, new hooks, Server Component best practices — quality patterns, not just versions |
+
+#### Performance
+
+| Source | What to Search | Why It Matters |
+|--------|---------------|----------------|
+| Perf.email Newsletter | Search: `site:perf.email` | **Aggregator** — biweekly curated web performance digest, perfectly aligned with this cadence |
+| DebugBear Blog | Search: `site:debugbear.com/blog` | Data-driven CWV analysis with real CrUX data, annual performance reviews |
+| Vercel Engineering Blog | Search: `site:vercel.com/blog engineering performance` | Concrete benchmark data for the deployment platform — Fluid Compute, streaming, edge patterns |
+| Web Performance Calendar | Search: `site:calendar.perfplanet.com` | Annual December series where Google engineers publish their most detailed frontier work |
+| Callstack Blog (RN perf) | Search: `site:callstack.com/blog react native performance` | Mobile-specific: cold start, 60fps budgets, Hermes engine, New Architecture |
+
+#### Demo & Presentation
+
+| Source | What to Search | Why It Matters |
+|--------|---------------|----------------|
+| Remotion Blog | Search: `site:remotion.dev/blog OR site:remotion.dev/learn` | Programmatic video patterns, Claude Code integration, composition techniques |
+| Rive Blog | Search: `site:rive.app/blog` | Interactive animation — state machines, 90% smaller than Lottie, cross-platform |
 
 ## Evaluation Criteria
 
@@ -79,8 +118,23 @@ For every finding, evaluate against the founder's templates in this repo:
 1. **Does this change an existing workflow?** Does it affect how the bootstrap, health system, screen design, ops pipeline, demo video, or any other documented system works? If yes → `ACTION NEEDED`
 2. **Does this enable something new?** Could this meaningfully improve an existing workflow, or does it enable something the founder has been waiting for (check the "On the horizon" items)? If yes → `OPPORTUNITY`
 3. **Does this obsolete a workaround?** Is there something in the templates that exists as a workaround for a limitation that's now fixed? If yes → `ACTION NEEDED`
-4. **Is this interesting but not urgent?** Worth knowing about, but no immediate workflow impact? → `BOOKMARKED`
-5. **Is this noise?** Minor patch, marketing fluff, doesn't affect the founder's stack? → Skip entirely. Don't report it.
+4. **Does this raise the quality bar?** Would adopting this improve the visual quality, interaction quality, performance, or security of apps built with the templates? If yes, identify which file it would update: `enhancement-standards.md`, `visual-qa/SKILL.md`, `LAUNCH-CHECKLIST.md`, `CLAUDE.md` Hard Rules, or `DESIGN-SYSTEM.md` template. → `OPPORTUNITY` (or `ACTION NEEDED` if it's a security vulnerability affecting the current stack)
+5. **Is this interesting but not urgent?** Worth knowing about, but no immediate workflow impact? → `BOOKMARKED`
+6. **Is this noise?** Minor patch, marketing fluff, doesn't affect the founder's stack? → Skip entirely. Don't report it.
+
+### Cross-System Evaluation Lens
+
+For every finding scored as ACTION NEEDED or OPPORTUNITY, trace its impact across the founder's interconnected systems. Ask:
+
+- **Screen Design (Phase 6.5):** Does this change how screens should be designed? Would it affect the Visual Production Spec, the flow map, or component extraction?
+- **UI Review (Track 5):** Does this change what the visual-qa skill should check? Should it update Pass 1 compliance checks or Pass 2 enhancement standards?
+- **Demo Navigator (Phase 9):** Does this affect how the demo should present the app? Navigation patterns, transition quality, interaction timing?
+- **Demo Video (Phase 10):** Does this improve video production quality? New animation techniques, motion patterns, device mockup approaches?
+- **Health System (Track 4):** Does this add something the health system should catch? New error patterns, performance regressions, security checks?
+- **Launch Checklist:** Does this add a pre-launch verification step? Security hardening, performance thresholds, accessibility requirements?
+- **CLAUDE.md:** Does this change how CC should behave? New Hard Rules, new Learned Corrections patterns, new protected systems?
+
+Include cross-system impacts in the findings log. Example: "New CSS `@starting-style` → updates enhancement-standards.md Section 2.3 (Surface & Elevation), improves demo video text card animations (Phase 10), visual-qa Pass 2 could flag screens not using it for entry animations."
 
 ### Specific Things to Watch For
 
@@ -99,6 +153,45 @@ These are high-priority patterns the founder cares about. Flag immediately if fo
 - **Token cost decreases** — founder is watching for when inline evaluator pattern becomes viable
 - **TurboQuant/PolarQuant PRs in llama.cpp** — founder is explicitly monitoring for these
 - **ghost-cursor-playwright updates** — affects demo recording human-like interactions
+
+### Security (high priority)
+
+- **Next.js CVEs** — any security advisory from nextjs.org/blog. React2Shell was CVSS 10.0.
+- **Supabase RLS changes** — new RLS defaults, security advisor updates, auth bypass techniques
+- **npm supply chain attacks** — compromised packages in the Next.js/React/Supabase ecosystem
+- **Vercel platform security** — WAF updates, automatic protections, environment variable exposure
+- **OWASP list updates** — Web Top 10, LLM Top 10, Mobile Top 10, Agentic Top 10 revisions
+- **Vibe coding vulnerability class** — AI-generated code security patterns (broken RLS, exposed keys, missing validation)
+- **React security advisories** — RSC vulnerabilities, XSS vectors in new patterns
+
+### Design Quality
+
+- **CSS features reaching Baseline** — when a feature ships in all major browsers, it's safe to adopt and should be checked against enhancement-standards.md
+- **shadcn/ui new components or major updates** — affects the component patterns section of the design system
+- **Animation/motion pattern evolution** — new spring configs, easing standards, reduced-motion handling from Emil Kowalski, Framer Motion, or Rive
+- **Color system advances** — OKLCH adoption, wide gamut (Display P3), new palette generation techniques
+- **Accessibility standards** — WCAG updates, ARIA pattern changes, touch target requirement changes
+
+### Performance
+
+- **Core Web Vitals threshold changes** — any modification to LCP/INP/CLS targets
+- **New browser performance APIs** — View Transitions stabilization, Speculation Rules updates, Navigation API
+- **React Compiler patterns** — auto-memoization adoption, performance impact data
+- **Next.js caching/streaming changes** — PPR updates, Cache Components evolution
+- **React Native New Architecture milestones** — Fabric, TurboModules, Hermes updates affecting mobile perf
+
+### Demo Quality
+
+- **Remotion new features** — composition patterns, rendering improvements, Claude Code integration updates
+- **Rive capabilities** — state machine improvements, new runtime features, cross-platform updates
+
+## Day-of-Week Logic
+
+1. Check today's day of week AND day of month.
+2. **Every day:** Check Tier 1 sources.
+3. **Mondays:** Also check Tier 2 sources (framework releases + security).
+4. **1st and 15th of month:** Also check Tier 3 sources (design craft, performance, demo quality).
+5. If Monday falls on the 1st or 15th, check all three tiers.
 
 ## What the Founder Is Building
 
